@@ -1,61 +1,46 @@
-const express= require('express');
-const { request } = require('http');
-const bodyParser= require('body-parser');
-const app= express();
+const { ApolloServer, gql } = require('apollo-server');
 
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json());
-app.get("/", function(req, res){
-    res.send("server up");
-});
+const typeDefs = gql`
+ 
+  type Book {
+    
+    title: String
+    author: String 
+  }
 
-//creating an object of books
-const books=[
+  type Query {
+    books: [Book]
+  }
+`;
+const books = [
     {
-        id:1,
-        name:"Harry Potter",
-        author: "JK Rowling"
-    },  
-    {
-        id:2,
-        name: "The Alchemist",
-        author: "Paulo Coelho"
+      // id:1,
+      title: 'The Awakening',
+      author: 'Kate Chopin',
     },
     {
-        id:3,
-        name: "A Game of Thrones",
-        author: "George Martin"
-    }
-];
+      // id:2,
+      title: 'City of Glass',
+      author: 'Paul Auster',
+    },
+  ];
 
+ 
+const resolvers = {
+    Query: {
+      books: () => books,
+    },
+  };
+  
 
-app.get("/getBooks", function(req, res){
-    res.status(200).send(books);
+const server = new ApolloServer({ typeDefs, resolvers });
+
+server.listen().then(({ url }) => {
+  console.log(`Server ready at ${url}`);
 });
 
-app.get("/getBooks/:id", function(req, res){
-    const id= req.params.id;
-    const book=  books.find(book => book.id == parseInt(id));
-    if(!book) {
-        res.send("ID not found");
-    }
-    res.status(200).send(book);
-});
+function sum(a,b){
+  return a+b;
+}
 
-app.post("/getBook", function(req, res){
-   console.log(req);
-    const book= {
-        id: books.length +1,
-        name: req.body.name,
-        author:  req.body.author
-    }
-    books.push(book);
-    res.status(200).send(books);
-});
-
-
-app.listen(3000, function(){
-    console.log("server running on port 3000");
-}); 
-
-module.exports=app
+module.exports = sum;
